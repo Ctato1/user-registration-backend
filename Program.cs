@@ -31,13 +31,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.AllowAnyOrigin();
+        policy.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
-// use CORS Policy
-app.UseCors("AllowAllOrigins");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -46,6 +46,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// use CORS Policy
+app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
 
 app.MapControllers();
@@ -60,6 +62,8 @@ app.MapPost("/api/signup", async (UserManager<AppUser> userManager,
         UserName = userRegistrationModel.Email,  
         Email = userRegistrationModel.Email,
         FullName = userRegistrationModel.FullName,
+        PhoneNumber = userRegistrationModel.PhoneNumber
+        
     };
     var result = await userManager.CreateAsync(user,userRegistrationModel.Password);
     if (result.Succeeded)
@@ -70,7 +74,8 @@ app.MapPost("/api/signup", async (UserManager<AppUser> userManager,
     {
         return Results.BadRequest(result);
     }
-});
+}).WithTags("Personal Identity");
+
 
 app.Run();
 
@@ -79,4 +84,5 @@ public class UserRegistrationModel
     public string Email { get; set; }
     public string Password { get; set; }
     public string FullName { get; set; }
+    public string PhoneNumber { get; set; }
 }
